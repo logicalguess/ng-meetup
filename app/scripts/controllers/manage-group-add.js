@@ -19,9 +19,15 @@ angular.module( 'ngRouterApp' )
             };
 
             $scope.ok = function () {
-                appService.addGroup( $scope.data.groupName ).then( function () {
-                    $scope.$close( true );
-                } );
+                $scope.publish({eventName: 'addGroup', eventData: $scope.data.groupName}, ['GroupComponent']);
+                $scope.$close( true );
+                //appService.addGroup( $scope.data.groupName ).then( function () {
+                //    $scope.$close( true );
+                //} );
             };
+
+            $scope.publish = function (event, components) {
+                eventStream.publish({event: event, components: components});
+            }
         }]
 );

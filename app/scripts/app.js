@@ -1,5 +1,52 @@
 'use strict';
 
+var addGroupViewModel = {
+    addGroup: function(groupName) {
+        console.log('ADD GROUP');
+        this.publish({eventName: 'addGroup', eventData: groupName});
+        this.$close( true );
+    }
+};
+
+var GroupComponent = {
+    initialState: {
+        groups: [
+            {id: '34D', name: 'AM Classroom'},
+            {id: 'A5C', name: 'PM Classroom'},
+            {id: 'K3P', name: 'After School Care'}
+        ],
+
+        getMembersForGroup: function(id) {
+            return [
+                {id : '101', name : 'Amy Adams'},
+                {id : '102', name : 'Bill Bixby'},
+                {id : '103', name : 'Chevy Chase'},
+                {id : '103', name : 'Danny Devito'},
+                {id : '103', name : 'Emilio Estevez'},
+                {id : '103', name : 'Farah Fawcett'},
+                {id : '103', name : 'Gordon Gecko'},
+                {id : '103', name : 'Helen Hunt'}
+            ]
+        }
+    },
+    eventProcessor: function (state, event) {
+        if (event.eventName == 'addGroup') {console.log('ADD GROUP', event)
+            var group = {
+                id : Math.random().toString( 36 ).substring( 3 ),
+                name : event.eventData
+            };
+            state.groups = state.groups.concat(group);
+
+        }
+        return state;
+    },
+    publishedStateMapper: function (state) {
+        return state;
+    }
+};
+
+var groupDataModel = LogicalComponent('GroupComponent', GroupComponent)
+
 /**
  * @ngdoc overview
  * @name ngRouterApp
@@ -86,7 +133,9 @@ angular
                                 state : function ( groups ) {
                                     return {groups: groups};
                                 }
-                            }
+                            },
+                            viewModel: {},
+                            dataModel: groupDataModel
                             //controllerAs : 'manageGroups',
                             //controller : 'ManageGroupsCtrl'
                         }

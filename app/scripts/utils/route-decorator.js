@@ -1,21 +1,6 @@
 'use strict';
 
-var base = {
-    say: function () {
-        return ' say';
-    }
-};
-
-var stream = Rx.Observable.return({
-        groups: [
-            {id : '34D', name : 'X'},
-            {id : 'A5C', name : 'Y'},
-            {id : 'K3P', name : 'Z'}
-        ],
-        name : 'Wilma Fintstone'
-}).delay(3000);
-
-function buildController($injector, resolve) {
+function buildController($injector, viewModel, dataModel, resolve) {
     var deps = resolve ? Object.keys(resolve) : [];
     deps.unshift('$scope');
 
@@ -24,7 +9,7 @@ function buildController($injector, resolve) {
             var dep = deps[i];
             $scope[dep] = arguments[i];
         }
-        $injector.invoke(ObserverCtrl(base, stream, $scope['state']), this, {$scope: $scope});
+        $injector.invoke(ObserverCtrl(viewModel, dataModel, $scope['state']), this, {$scope: $scope});
     };
 
     ctrl.$inject = deps;
@@ -39,7 +24,7 @@ angular.module('route-decorator', ['ui.router'])
             Object.keys(views).forEach(function (viewName) {
                 var view = views[viewName];
                 if (!view.controller && !state.controller) {
-                    view.controller = buildController($injector, view.resolve || state.resolve);
+                    view.controller = buildController($injector, view.viewModel, view.dataModel, view.resolve || state.resolve);
                 }
             });
 
