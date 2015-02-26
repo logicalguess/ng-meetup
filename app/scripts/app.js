@@ -2,9 +2,7 @@
 
 var addGroupViewModel = {
     addGroup: function(groupName) {
-        console.log('ADD GROUP');
         this.publish({eventName: 'addGroup', eventData: groupName});
-        this.$close( true );
     }
 };
 
