@@ -9,7 +9,7 @@
  * Main module of the application.
  */
 angular
-    .module( 'ngRouterApp', ['ui.router', 'ui.bootstrap', 'ui.bootstrap.modal'] )
+    .module( 'ngRouterApp', ['ui.router', 'route-decorator', 'ui.bootstrap', 'ui.bootstrap.modal'] )
     .provider( 'modalState', function ( $stateProvider ) {
         var provider = this;
         this.$get = function () {
@@ -39,19 +39,24 @@ angular
             $stateProvider
                 .state( 'app', {
                     url : '/',
-                    views : {
-                        '' : {
-                            templateUrl : 'views/main.html'
-                        }
-                    },
-                    controllerAs : 'main',
-                    controller : 'MainCtrl',
+                    //controllerAs : 'main',
+                    //controller : 'MainCtrl',
                     resolve : {
                         config : ['appService', function ( appService ) {
                             console.log( 'Returning promise from app' );
                             return appService.init();
                         }]
-                    }
+                    },
+                    views : {
+                            '' : {
+                                resolve : {
+                                    state: function(config) {
+                                        return config;
+                                    }
+                                },
+                                templateUrl : 'views/main.html'
+                            }
+                        }
                 } )
                 .state( 'app.manage', {
                     abstract : true,
@@ -77,8 +82,13 @@ angular
                     views : {
                         'content' : {
                             templateUrl : 'views/manage-groups.html',
-                            controllerAs : 'manageGroups',
-                            controller : 'ManageGroupsCtrl'
+                            resolve : {
+                                state : function ( groups ) {
+                                    return {groups: groups};
+                                }
+                            }
+                            //controllerAs : 'manageGroups',
+                            //controller : 'ManageGroupsCtrl'
                         }
                     }
                 } )
