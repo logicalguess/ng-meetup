@@ -30,6 +30,9 @@ function ObserverCtrl(viewModel, model, initialState) {
                 subscription.dispose();
             });
         }
+        if (viewModel && viewModel.init) {
+            viewModel.init($scope);
+        }
     }
 }
 var addController = function(app, name, pojo, stream) {

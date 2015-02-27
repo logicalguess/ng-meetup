@@ -6,29 +6,68 @@ var addGroupViewModel = {
     }
 };
 
+var membersViewModel = {
+    init: function (ctx) {
+        var id = ctx.params.id;
+        ctx.groupName = 'Unknown';
+        for (var i = 0, c = ctx.groups.length; i < c; i++)
+            if (ctx.groups[i].id === id) {
+                ctx.groupName = ctx.groups[i].name;
+                break;
+            }
+
+        ctx.publish({eventName: 'setTitle', eventData: ctx.groupName}, ['HeaderComponent']);
+    },
+    getMembersForGroup: function(id) {
+        return [
+            {id : '101', name : 'Amy Adams'},
+            {id : '102', name : 'Bill Bixby'},
+            {id : '103', name : 'Chevy Chase'},
+            {id : '103', name : 'Danny Devito'},
+            {id : '103', name : 'Emilio Estevez'},
+            {id : '103', name : 'Farah Fawcett'},
+            {id : '103', name : 'Gordon Gecko'},
+            {id : '103', name : 'Helen Hunt'}
+        ]
+    }
+};
+
+var headerViewModel = {
+    addFunc: function () {
+        this.go( 'app.manage.groups.add' );
+    }
+};
+
+var HeaderComponent = {
+    initialState: {
+        title: 'My Groups'
+    },
+    eventProcessor: function (state, event) {
+        if (event.eventName == 'setTitle') {
+            state.title = event.eventData;
+        }
+        if (event.eventName == 'setDefault') {
+            state.title = 'My Groups';
+        }
+        return state;
+    },
+    publishedStateMapper: function (state) {
+        return state;
+    }
+};
+
+var headerDataModel = LogicalComponent('HeaderComponent', HeaderComponent)
+
 var GroupComponent = {
     initialState: {
         groups: [
             {id: '34D', name: 'AM Classroom'},
             {id: 'A5C', name: 'PM Classroom'},
             {id: 'K3P', name: 'After School Care'}
-        ],
-
-        getMembersForGroup: function(id) {
-            return [
-                {id : '101', name : 'Amy Adams'},
-                {id : '102', name : 'Bill Bixby'},
-                {id : '103', name : 'Chevy Chase'},
-                {id : '103', name : 'Danny Devito'},
-                {id : '103', name : 'Emilio Estevez'},
-                {id : '103', name : 'Farah Fawcett'},
-                {id : '103', name : 'Gordon Gecko'},
-                {id : '103', name : 'Helen Hunt'}
-            ]
-        }
+        ]
     },
     eventProcessor: function (state, event) {
-        if (event.eventName == 'addGroup') {console.log('ADD GROUP', event)
+        if (event.eventName == 'addGroup') {
             var group = {
                 id : Math.random().toString( 36 ).substring( 3 ),
                 name : event.eventData
@@ -43,7 +82,7 @@ var GroupComponent = {
     }
 };
 
-var groupDataModel = LogicalComponent('GroupComponent', GroupComponent)
+var groupDataModel = LogicalComponent('GroupComponent', GroupComponent);
 
 /**
  * @ngdoc overview
@@ -81,7 +120,11 @@ angular
         function ( $stateProvider, $urlRouterProvider, modalStateProvider ) {
             $urlRouterProvider.when( '', '/' );
             $urlRouterProvider.otherwise( '/' );
-            $stateProvider
+            var viewModel = {
+                addFunc: function () {
+                    this.go( 'app.manage.groups.add' );
+                }
+            };$stateProvider
                 .state( 'app', {
                     url : '/',
                     //controllerAs : 'main',
@@ -108,8 +151,10 @@ angular
                     views : {
                         'header@app.manage' : {
                             templateUrl : 'views/manage-header.html',
-                            controllerAs : 'header',
-                            controller : 'ManageHeaderCtrl'
+                            //controllerAs : 'header',
+                            //controller : 'ManageHeaderCtrl'
+                            viewModel: headerViewModel,
+                            dataModel: headerDataModel
                         },
                         '@' : {
                             templateUrl : 'views/manage.html'
@@ -137,6 +182,9 @@ angular
                             //controllerAs : 'manageGroups',
                             //controller : 'ManageGroupsCtrl'
                         }
+                    },
+                    onEnter: function(){
+                        eventStream.publish({event: {eventName: 'setDefault'}, components:['HeaderComponent']});
                     }
                 } )
                 .state( 'app.manage.members', {
@@ -144,13 +192,15 @@ angular
                     views : {
                         'content' : {
                             templateUrl : 'views/manage-members.html',
-                            controllerAs : 'manageMembers',
-                            controller : 'ManageMembersCtrl'
+                            //controllerAs : 'manageMembers',
+                            //controller : 'ManageMembersCtrl'
+                            viewModel: membersViewModel,
+                            dataModel: null
                         }
                     },
                     resolve : {
-                        members : ['appService', '$stateParams', function ( appService, $stateParams ) {
-                            return appService.getMembers( $stateParams.id );
+                        params: ['$stateParams', function ( $stateParams ) {
+                            return $stateParams;
                         }]
                     }
                 } );
@@ -204,9 +254,22 @@ angular
 
         $rootScope.$on( '$stateChangeSuccess',
             function ( event, toState, toParams, fromState, fromParams ) {
+                $rootScope.previousState = fromState.name;
+                $rootScope.currentState = toState.name;
                 $log.info( 'State change success:', fromState, '->', toState );
                 if ( console.time && console.timeEnd ) {
                     console.timeEnd( 'State change -> ' + toState.name );
                 }
             } );
+
+        $rootScope.back = function() {
+            $state.go($rootScope.previousState);
+        };
+
+        $rootScope.publish = function (event, components) {
+            eventStream.publish({event: event, components: components});
+        };
+
+        $rootScope.go = $state.go;
+
     }] );

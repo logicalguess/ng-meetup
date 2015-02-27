@@ -25,9 +25,5 @@ angular.module( 'ngRouterApp' )
                 //    $scope.$close( true );
                 //} );
             };
-
-            $scope.publish = function (event, components) {
-                eventStream.publish({event: event, components: components});
-            }
         }]
 );
