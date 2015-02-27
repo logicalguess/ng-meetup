@@ -1,4 +1,3 @@
-
 var HeaderComponent = {
     initialState: {
         title: 'My Groups'
