@@ -17,9 +17,6 @@ var membersViewModel = {
             }
 
         ctx.publish({eventName: 'setTitle', eventData: ctx.groupName}, ['HeaderComponent']);
-    },
-    getMembersForGroup: function(id) {
-        this.publish({eventName: 'addGroup', eventData: id});
     }
 };
 
