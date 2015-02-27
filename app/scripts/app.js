@@ -89,7 +89,7 @@ angular
                                     return {groups: groups};
                                 }
                             },
-                            viewModel: {},
+                            viewModel: groupViewModel,
                             dataModel: groupDataModel
                             //controllerAs : 'manageGroups',
                             //controller : 'ManageGroupsCtrl'
